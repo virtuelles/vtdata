@@ -199,17 +199,17 @@ print('頻道 Channel:', sinfo['snippet']['channelTitle'])
 print('標題 Title:', sinfo['snippet']['title'])
 print('影片ID Video ID:', sinfo['id'])
 if "publishedAt" in sinfo['snippet']:
-    print('直播公開時間(UTC+8):'+Stream_Created)
+    print('直播公開時間(UTC+8):', Stream_Created)
 
 if "scheduledStartTime" in sinfo['liveStreamingDetails']:
-    print('預定開始時間(UTC+8):'+Planed_Start_Time)
+    print('預定開始時間(UTC+8):', Planed_Start_Time)
 
 if "actualStartTime" in sinfo['liveStreamingDetails']:
-    print('實際開始時間(UTC+8):'+Actual_Start_Time)
+    print('實際開始時間(UTC+8):', Actual_Start_Time)
 
 print()
 if "actualEndTime" in sinfo['liveStreamingDetails']:
-    print('直播結束時間(UTC+8):'+actualEndTime)
+    print('直播結束時間(UTC+8):', actualEndTime)
 
 #print('是否在直播 liveBroadcastContent:', sinfo['snippet']['liveBroadcastContent'])
 '''

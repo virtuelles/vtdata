@@ -115,14 +115,14 @@ streamData.write('time,concurrentViewers,viewCount,likeCount,dislikeCount\n')
 
 #開啟txt檔寫入直播資訊
 streamInfo=open('info of '+TitleFileName+'.txt', 'a', newline='', encoding='UTF-8')
-streamInfoCollectstart=['頻道:',Channel,'\n','標題:',Title,'\n','影片ID:',Video_ID,'\n','直播公開時間(UTC+8):',str(Stream_Created),'\n','預定開始時間(UTC+8):',str(Planed_Start_Time),'\n']
+streamInfoCollectstart=['頻道 Channel:',Channel,'\n','標題 Title:',Title,'\n','影片ID Video_ID:',Video_ID,'\n','直播公開時間 Stream Created time(UTC+8):',str(Stream_Created),'\n','預定開始時間 Planed Start Time(UTC+8):',str(Planed_Start_Time),'\n']
 streamInfo.writelines(streamInfoCollectstart)
 
-streamInfoCollectAST=['實際開始時間(UTC+8):',str(Actual_Start_Time),'\n']
+streamInfoCollectAST=['實際開始時間 Actual Start Time(UTC+8):',str(Actual_Start_Time),'\n']
 streamInfo.writelines(streamInfoCollectAST)
 localtime = datetime.datetime.now().replace(microsecond=0).isoformat()
 localtime=localTimeClean(localtime)
-streamInfo.write('紀錄開始時間(UTC+8):'+localtime+'\n')
+streamInfo.write('紀錄開始時間 Log Start Time(UTC+8):'+localtime+'\n')
 
 #直播開始後寫入csv
 while liveBroadcastContent=='live':
@@ -168,24 +168,24 @@ MaxConcurrentViewers=csvRead['concurrentViewers'].max()
 if "actualEndTime" in sinfo['liveStreamingDetails']:
     actualEndTime=sinfo['liveStreamingDetails']['actualEndTime']
     actualEndTime=APItimeSetToUTC8(actualEndTime)
-    streamInfo.write('直播結束時間(UTC+8):'+str(actualEndTime)+'\n')
+    streamInfo.write('直播結束時間 Actual End Time(UTC+8):'+str(actualEndTime)+'\n')
 
-streamInfo.write('最高同時觀看人數:'+str(MaxConcurrentViewers)+'\n')
+streamInfo.write('最高同時觀看人數 Max Concurrent Viewers:'+str(MaxConcurrentViewers)+'\n')
 
 if "viewCount" in sinfo['statistics']:
-    streamInfo.write('結束時播放數:'+str(viewCount)+'\n')
+    streamInfo.write('結束時播放數 View Count:'+str(viewCount)+'\n')
 else:
-    streamInfo.write('結束時播放數:NaN'+'\n')
+    streamInfo.write('結束時播放數 View Count:NaN'+'\n')
 
 if "likeCount" in sinfo['statistics']:
-    streamInfo.write('結束時喜歡數:'+str(likeCount)+'\n')
+    streamInfo.write('結束時喜歡數 Like Count:'+str(likeCount)+'\n')
 else:
-    streamInfo.write('結束時喜歡數:NaN'+'\n')
+    streamInfo.write('結束時喜歡數 Like Count:NaN'+'\n')
 
 if "dislikeCount" in sinfo['statistics']:
-    streamInfo.write('結束時不喜歡數:'+str(dislikeCount)+'\n')
+    streamInfo.write('結束時不喜歡數 Dislike Count:'+str(dislikeCount)+'\n')
 else:
-    streamInfo.write('結束時不喜歡數:NaN'+'\n')
+    streamInfo.write('結束時不喜歡數 Dislike Count:NaN'+'\n')
 
 
 
@@ -199,17 +199,16 @@ print('頻道 Channel:', sinfo['snippet']['channelTitle'])
 print('標題 Title:', sinfo['snippet']['title'])
 print('影片ID Video ID:', sinfo['id'])
 if "publishedAt" in sinfo['snippet']:
-    print('直播公開時間(UTC+8):', Stream_Created)
+    print('直播公開時間 Stream Created Time(UTC+8):', Stream_Created)
 
 if "scheduledStartTime" in sinfo['liveStreamingDetails']:
-    print('預定開始時間(UTC+8):', Planed_Start_Time)
+    print('預定開始時間 Planed Start Time(UTC+8):', Planed_Start_Time)
 
 if "actualStartTime" in sinfo['liveStreamingDetails']:
-    print('實際開始時間(UTC+8):', Actual_Start_Time)
+    print('實際開始時間 Actual Start Time(UTC+8):', Actual_Start_Time)
 
-print()
 if "actualEndTime" in sinfo['liveStreamingDetails']:
-    print('直播結束時間(UTC+8):', actualEndTime)
+    print('直播結束時間 Actual End Time(UTC+8):', actualEndTime)
 
 #print('是否在直播 liveBroadcastContent:', sinfo['snippet']['liveBroadcastContent'])
 '''
@@ -219,19 +218,19 @@ else:
     print('同時觀看人數 concurrentViewers:NaN')
 '''
 
-print('最高同時觀看人數:'+str(MaxConcurrentViewers))
+print('最高同時觀看人數 Max Concurrent Viewers:'+str(MaxConcurrentViewers))
 
 if "viewCount" in sinfo['statistics']:
-    print('結束時播放數 viewCount:', sinfo['statistics']['viewCount'])
+    print('結束時播放數 View Count:', sinfo['statistics']['viewCount'])
 else:
-    print('結束時播放數 viewCount:NaN')
+    print('結束時播放數 View Count:NaN')
 
 if "likeCount" in sinfo['statistics']:
-    print('結束時喜歡數 likeCount:', sinfo['statistics']['likeCount'])
+    print('結束時喜歡數 Like Count:', sinfo['statistics']['likeCount'])
 else:
-    print('結束時喜歡數 likeCount:NaN')
+    print('結束時喜歡數 Like Count:NaN')
 
 if "dislikeCount" in sinfo['statistics']:
-    print('結束時不喜歡數 dislikeCount:', sinfo['statistics']['dislikeCount'])
+    print('結束時不喜歡數 Dislike Count:', sinfo['statistics']['dislikeCount'])
 else:
-    print('結束時不喜歡數 dislikeCount:NaN')
+    print('結束時不喜歡數 DislikeCount:NaN')

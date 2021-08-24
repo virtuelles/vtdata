@@ -218,7 +218,7 @@ else:
     print('同時觀看人數 concurrentViewers:NaN')
 '''
 
-print('最高同時觀看人數 Max Concurrent Viewers:'+str(MaxConcurrentViewers))
+print('最高同時觀看人數 Max Concurrent Viewers: '+str(MaxConcurrentViewers))
 
 if "viewCount" in sinfo['statistics']:
     print('結束時播放數 View Count:', sinfo['statistics']['viewCount'])

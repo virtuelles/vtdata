@@ -1,6 +1,9 @@
 # coding=utf-8
 from datetime import *
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import datetime
 import requests
 import time
@@ -23,7 +26,7 @@ def sleep_time(hour, min, sec):
 
 def get_livestream_info(API_KEY,vID):
     '''
-     Use "videos" function to derive info of livestream
+     Use "videos" function to derive info of livestream,可能另做一個專爬liveinfo的
     '''
     params = {
               'part': 'liveStreamingDetails,statistics,snippet',
@@ -42,7 +45,7 @@ def get_livestream_info(API_KEY,vID):
 
 localtime = datetime.datetime.now().replace(microsecond=0).isoformat()
 localtime=localTimeClean(localtime)
-print('紀錄開始時間start at(UTC+8): '+localtime)
+print('運作開始時間start at(UTC+8): '+localtime)
 
 #輸入API,可以多申請幾個使用
 API_KEY = ['XXXXX','XXXXX']
@@ -126,9 +129,9 @@ streamInfo.writelines(streamInfoCollectstart)
 
 streamInfoCollectAST=['實際開始時間 Actual Start Time(UTC+8):',str(Actual_Start_Time),'\n']
 streamInfo.writelines(streamInfoCollectAST)
-localtime = datetime.datetime.now().replace(microsecond=0).isoformat()
-localtime=localTimeClean(localtime)
-streamInfo.write('紀錄開始時間 Log Start Time(UTC+8):'+localtime+'\n')
+Log_Start_Time = datetime.datetime.now().replace(microsecond=0).isoformat()
+Log_Start_Time=localTimeClean(Log_Start_Time)
+streamInfo.write('紀錄開始時間 Log Start Time(UTC+8):'+Log_Start_Time+'\n')
 
 #直播開始後寫入csv
 while liveBroadcastContent=='live':
@@ -179,10 +182,11 @@ MaxConcurrentViewers=csvRead['concurrentViewers'].max()
 
 #info寫入
 if "actualEndTime" in sinfo['liveStreamingDetails']:
-    actualEndTime=sinfo['liveStreamingDetails']['actualEndTime']
-    actualEndTime=APItimeSetToUTC8(actualEndTime)
-    streamInfo.write('直播結束時間 Actual End Time(UTC+8):'+str(actualEndTime)+'\n')
+    Actual_End_Time=sinfo['liveStreamingDetails']['actualEndTime']
+    Actual_End_Time=APItimeSetToUTC8(Actual_End_Time)
+    streamInfo.write('直播結束時間 Actual End Time(UTC+8):'+str(Actual_End_Time)+'\n')
 else:
+    Actual_End_Time='NaN'
     streamInfo.write('直播結束時間 Actual End Time(UTC+8):NaN\n')
 
 streamInfo.write('紀錄結束時最高同時觀看人數 Max Concurrent Viewers:'+str(MaxConcurrentViewers)+'\n')
@@ -202,13 +206,67 @@ if "dislikeCount" in sinfo['statistics']:
 else:
     streamInfo.write('紀錄結束時不喜歡數 Dislike Count:NaN'+'\n')
 
-
-
-
-
-
-
 streamInfo.close()
+
+
+#繪圖
+chartTitle='Channel: '+Channel+'\n'+'Title: '+Title+'\n'
+
+#這裡應該能簡化
+headers=['time','concurrentViewers','viewCount','likeCount','dislikeCount']
+df = pd.read_csv(TitleFileName+'.csv', names=headers,header=None,skiprows=1,usecols=[0,1,2,3,4])
+
+t = df['time']
+c = df['concurrentViewers']
+v = df['viewCount']
+l = df['likeCount']
+d = df['dislikeCount']
+
+MaxConcurrentViewers=df['concurrentViewers'].max()
+MaxViewCount=df['viewCount'].max()
+MaxLikeCount=df['likeCount'].max()
+MaxDislikeCount=df['dislikeCount'].max()
+countResult='MaxConcurrentViewers:{0}\nMaxLikeCount:{1}\nMaxDislikeCount:{2}\nMaxViewCount:{3}'.format(MaxConcurrentViewers,MaxLikeCount,MaxDislikeCount,MaxViewCount)
+timeResult='Planed Start Time(UTC+8):{0}\nActual Start Time(UTC+8):{1}\nLog Start Time(UTC+8):{2}\nActual End Time(UTC+8):{3}'.format(Planed_Start_Time,Actual_Start_Time,Log_Start_Time,Actual_End_Time)
+
+#標題副標題,圖表結構,部分頻道和標題因字型問題無法完整顯示
+fig, (ax1, ax2) = plt.subplots(2,sharex=True,figsize=(12.8,7.2))
+fig.suptitle(chartTitle,fontname="MS Gothic", fontsize=15)
+fig.set_facecolor('lightgray')
+ax1.set_facecolor('gainsboro')
+ax1.set_title(countResult,loc='left', fontsize=12)
+ax1.set_title(timeResult,loc='right', fontsize=12)
+
+#圖表1
+ax1.set_ylabel('count')
+ax1.plot(t,c,'b',label='concurrentViewers')
+ax1.plot(t,l,'g',label='likeCount')
+ax1.plot(t,d,'r',label='dislikeCount')
+ax1.legend(loc='upper left')
+ax1.ticklabel_format(axis='y', style='plain')
+
+#圖表2
+ax2.set_facecolor('gainsboro')
+ax2.plot(t,v,'c',label='viewCount')
+ax2.legend(loc='upper left')
+ax2.set_ylim(0,MaxViewCount)
+ax2.ticklabel_format(axis='y', style='plain')
+ax2.set_ylabel('count')
+
+#X軸簡化
+x = df.time
+ticker_spacing = x
+ticker_spacing = 160
+ax2.xaxis.set_major_locator(ticker.MultipleLocator(ticker_spacing))
+plt.xticks(rotation=20, fontsize=7)
+plt.xlabel('time')
+
+#儲存圖表
+fig.tight_layout()
+print('---儲存折線圖---')
+plt.savefig('chart of' + TitleFileName + '.png')
+print('---儲存完成---')
+
 #結束後輸出
 print('頻道 Channel:', sinfo['snippet']['channelTitle'])
 print('標題 Title:', sinfo['snippet']['title'])
@@ -216,20 +274,20 @@ print('影片ID Video ID:', sinfo['id'])
 if "publishedAt" in sinfo['snippet']:
     print('直播公開時間 Stream Created Time(UTC+8):', Stream_Created)
 else:
-    print('直播公開時間 Stream Created Time(UTC+8):NaN\n')
+    print('直播公開時間 Stream Created Time(UTC+8):NaN')
 
 if "scheduledStartTime" in sinfo['liveStreamingDetails']:
     print('預定開始時間 Planed Start Time(UTC+8):', Planed_Start_Time)
 else:
-    print('預定開始時間 Planed Start Time(UTC+8):NaN\n')
+    print('預定開始時間 Planed Start Time(UTC+8):NaN')
 
 if "actualStartTime" in sinfo['liveStreamingDetails']:
     print('實際開始時間 Actual Start Time(UTC+8):', Actual_Start_Time)
 else:
-    print('實際開始時間 Actual Start Time(UTC+8):NaN\n')
+    print('實際開始時間 Actual Start Time(UTC+8):NaN')
 
 if "actualEndTime" in sinfo['liveStreamingDetails']:
-    print('直播結束時間 Actual End Time(UTC+8):', actualEndTime)
+    print('直播結束時間 Actual End Time(UTC+8):', Actual_End_Time)
 else:
     print('直播結束時間 Actual End Time(UTC+8):NaN\n')
 

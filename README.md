@@ -22,6 +22,8 @@ python streamdata.py
 輸出如下圖  
 ![](https://i.imgur.com/vMPjGTb.png)  
 ![](https://i.imgur.com/Urn42L0.png)  
+直播結束後或手動跳出時自動生成圖表  
+![](https://i.imgur.com/3c2djsx.png)  
 > vtdata(或是看你想放在哪個資料夾)
 >> 頻道名稱資料夾
 >>> 直播標題資料夾

@@ -33,6 +33,7 @@ python streamdata.py
 
 ## countAfterStream使用教學
 基本上操作一樣,也可用於爬取影片,輸出view,like,dislike,comment  
+預設間格為10分鐘  
 儲存位置相同  
 ![](https://i.imgur.com/qQIfWIy.png)  
 > vtdata(或是看你想放在哪個資料夾)

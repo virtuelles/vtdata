@@ -33,7 +33,7 @@ def get_livestream_info(API_KEY,vID):
               'key': API_KEY,
               'id': vID,
               'fields': 'items(id,liveStreamingDetails(activeLiveChatId,concurrentViewers,scheduledStartTime,actualStartTime,actualEndTime),' + 
-              'snippet(channelId,channelTitle,description,liveBroadcastContent,publishedAt,thumbnails,title),statistics)'
+              'snippet(channelId,channelTitle,liveBroadcastContent,publishedAt,title),statistics)'
               }
     headers = {'User-Agent': 'Chrome/92.0.4515.107'}
     url = 'https://www.googleapis.com/youtube/v3/videos'
@@ -120,7 +120,7 @@ else:
 
 #開啟csv檔寫入直播數據
 streamData=open(TitleFileName+'.csv', 'a', newline='', encoding='UTF-8')
-streamData.write('time,concurrentViewers,viewCount,likeCount,dislikeCount\n')
+#streamData.write('time,concurrentViewers,viewCount,likeCount,dislikeCount\n')
 
 #開啟txt檔寫入直播資訊
 streamInfo=open('info of '+TitleFileName+'.txt', 'a', newline='', encoding='UTF-8')
@@ -170,6 +170,8 @@ while liveBroadcastContent=='live':
         second = sleep_time(0, 0, 9)
         time.sleep(second)
     except KeyboardInterrupt:
+        logStopTime = datetime.datetime.now().replace(microsecond=0).isoformat()
+        logStopTime=localTimeClean(logStopTime)
         print('---手動跳出紀錄---')
         break
     except:
@@ -177,9 +179,13 @@ while liveBroadcastContent=='live':
 
 streamData.close()
 #找同接最大值
-csvRead=pd.read_csv(TitleFileName+'.csv')
-MaxConcurrentViewers=csvRead['concurrentViewers'].max()
+headers=['time','concurrentViewers','viewCount','likeCount','dislikeCount']
+df = pd.read_csv(TitleFileName+'.csv', names=headers,header=None,skiprows=1,usecols=[0,1,2,3,4])
+#csvRead=pd.read_csv(TitleFileName+'.csv')
+MaxConcurrentViewers=df['concurrentViewers'].max()
 
+logStopTime = datetime.datetime.now().replace(microsecond=0).isoformat()
+logStopTime=localTimeClean(logStopTime)
 #info寫入
 if "actualEndTime" in sinfo['liveStreamingDetails']:
     Actual_End_Time=sinfo['liveStreamingDetails']['actualEndTime']
@@ -188,6 +194,8 @@ if "actualEndTime" in sinfo['liveStreamingDetails']:
 else:
     Actual_End_Time='NaN'
     streamInfo.write('直播結束時間 Actual End Time(UTC+8):NaN\n')
+
+streamInfo.write('紀錄結束時間 Log stop Time(UTC+8):'+str(logStopTime)+'\n')
 
 streamInfo.write('紀錄結束時最高同時觀看人數 Max Concurrent Viewers:'+str(MaxConcurrentViewers)+'\n')
 
@@ -213,8 +221,6 @@ streamInfo.close()
 chartTitle='Channel: '+Channel+'\n'+'Title: '+Title+'\n'
 
 #這裡應該能簡化
-headers=['time','concurrentViewers','viewCount','likeCount','dislikeCount']
-df = pd.read_csv(TitleFileName+'.csv', names=headers,header=None,skiprows=1,usecols=[0,1,2,3,4])
 
 t = df['time']
 c = df['concurrentViewers']
@@ -244,14 +250,16 @@ ax1.plot(t,l,'g',label='likeCount')
 ax1.plot(t,d,'r',label='dislikeCount')
 ax1.legend(loc='upper left')
 ax1.ticklabel_format(axis='y', style='plain')
+ax1.grid(True)
 
 #圖表2
 ax2.set_facecolor('gainsboro')
 ax2.plot(t,v,'c',label='viewCount')
 ax2.legend(loc='upper left')
-ax2.set_ylim(0,MaxViewCount)
+#ax2.set_ylim(0,MaxViewCount)
 ax2.ticklabel_format(axis='y', style='plain')
 ax2.set_ylabel('count')
+ax2.grid(True)
 
 #X軸簡化
 x = df.time
@@ -290,6 +298,8 @@ if "actualEndTime" in sinfo['liveStreamingDetails']:
     print('直播結束時間 Actual End Time(UTC+8):', Actual_End_Time)
 else:
     print('直播結束時間 Actual End Time(UTC+8):NaN\n')
+
+print('紀錄結束時間 Log Stop Time(UTC+8): '+str(logStopTime))
 
 #print('是否在直播 liveBroadcastContent:', sinfo['snippet']['liveBroadcastContent'])
 '''

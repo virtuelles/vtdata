@@ -37,9 +37,10 @@ python streamdata.py
 > vtdata(或是看你想放在哪個資料夾)
 >> 頻道名稱資料夾
 >>> 直播標題資料夾
->>>> count after stream of 影片資訊.txt
->>>> count after stream of view,like,dislike,comment.csv
+>>>> count after stream of 影片資訊.txt  
+>>>> count after stream of view,like,dislike,comment.csv  
 >>>> count chart after stream of 影片.png
+![](https://i.imgur.com/qQIfWIy.png)
 
 ## Todo
 - [X] 時間格式整理

@@ -31,6 +31,16 @@ python streamdata.py
 >>>> 本次直播同時觀看人數、播放數、喜歡數、不喜歡數紀錄.csv  
 >>>> chart of 本次直播圖表.png  
 
+## countAfterStream使用教學
+基本上操作一樣,也可用於爬取影片,輸出view,like,dislike,comment  
+儲存位置相同  
+> vtdata(或是看你想放在哪個資料夾)
+>> 頻道名稱資料夾
+>>> 直播標題資料夾
+>>>> count after stream of 影片資訊.txt
+>>>> count after stream of view,like,dislike,comment.csv
+>>>> count chart after stream of 影片.png
+
 ## Todo
 - [X] 時間格式整理
 - [ ] 捕捉自動化

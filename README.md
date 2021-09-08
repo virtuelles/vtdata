@@ -41,7 +41,10 @@ python streamdata.py
 >>> 直播標題資料夾
 >>>> count after stream of 影片資訊.txt  
 >>>> count after stream of view,like,dislike,comment.csv  
->>>> count chart after stream of 影片.png
+>>>> count chart after stream of 影片.png  
+
+## collectall使用教學
+就是全部合在一起跑,用一次要一天以上,調查影片觀看計算用  
 
 
 ## Todo

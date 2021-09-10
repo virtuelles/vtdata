@@ -84,7 +84,7 @@ if "actualStartTime" in sinfo['liveStreamingDetails']:
 #檢查直播是否開始
 liveBroadcastContent=sinfo['snippet']['liveBroadcastContent']
 
-notStartHold = sleep_time(0, 0, 30)
+notStartHold = sleep_time(0, 1, 0)
 while liveBroadcastContent=='none':
     print('直播已結束')
     break
@@ -92,7 +92,7 @@ while liveBroadcastContent=='upcoming':
     try:
         localtime = datetime.datetime.now().replace(microsecond=0).isoformat()
         localtime=localTimeClean(localtime)
-        print(localtime+'(UTC+8) 直播尚未開始,等待30秒後自動重新確認')
+        print(localtime+'(UTC+8) 直播尚未開始,等待一分鐘後自動重新確認')
         time.sleep(notStartHold)
         sinfo = get_livestream_info(API_KEY[apiKeySelect],vid)
         liveBroadcastContent=sinfo['snippet']['liveBroadcastContent']
@@ -180,7 +180,7 @@ while liveBroadcastContent=='live':
 streamData.close()
 #找同接最大值
 headers=['time','concurrentViewers','viewCount','likeCount','dislikeCount']
-df = pd.read_csv(TitleFileName+'.csv', names=headers,header=None,skiprows=1,usecols=[0,1,2,3,4])
+df = pd.read_csv(TitleFileName+'.csv', names=headers,header=None,usecols=[0,1,2,3,4])
 #csvRead=pd.read_csv(TitleFileName+'.csv')
 MaxConcurrentViewers=df['concurrentViewers'].max()
 
@@ -272,7 +272,7 @@ plt.xlabel('time')
 #儲存圖表
 fig.tight_layout()
 print('---儲存折線圖---')
-plt.savefig('chart of' + TitleFileName + '.png')
+plt.savefig('chart of ' + TitleFileName + '.png')
 print('---儲存完成---')
 
 #結束後輸出
@@ -326,13 +326,13 @@ if "dislikeCount" in sinfo['statistics']:
 else:
     print('紀錄結束時不喜歡數 DislikeCount:NaN')
 
-#開啟csv檔寫入直播數據
+#開啟csv檔寫入直播後數據
 countAfterStream=open('count after stream of '+TitleFileName+'.csv', 'a', newline='', encoding='UTF-8')
 #countAfterStream.write('time,viewCount,likeCount,dislikeCount\n')
 
-#開啟txt檔寫入直播資訊
+#開啟txt檔寫入直播後資訊
 countInfo=open('count after stream info of '+TitleFileName+'.txt', 'a', newline='', encoding='UTF-8')
-streamInfoCollectstart=['頻道 Channel:',Channel,'\n','標題 Title:',Title,'\n','影片ID Video_ID:',Video_ID,'\n','直播公開時間 Stream Created time(UTC+8):',str(Stream_Created),'\n','預定開始時間 Planed Start Time(UTC+8):',str(Planed_Start_Time),'\n']
+streamInfoCollectstart=['count after stream: 1 day version\n','頻道 Channel:',Channel,'\n','標題 Title:',Title,'\n','影片ID Video_ID:',Video_ID,'\n','直播公開時間 Stream Created time(UTC+8):',str(Stream_Created),'\n','預定開始時間 Planed Start Time(UTC+8):',str(Planed_Start_Time),'\n']
 countInfo.writelines(streamInfoCollectstart)
 
 streamInfoCollectAST=['實際開始時間 Actual Start Time(UTC+8):',str(Actual_Start_Time),'\n']
@@ -341,7 +341,7 @@ Log_Start_Time = datetime.datetime.now().replace(microsecond=0).isoformat()
 Log_Start_Time=localTimeClean(Log_Start_Time)
 countInfo.write('紀錄開始時間 Log Start Time(UTC+8):'+Log_Start_Time+'\n')
 
-#寫入csv,預設一天,144*10min,手動跳出會導致輸出錯誤
+#寫入csv,預設一天,144*10min
 
 for i in range(144):
 
@@ -446,8 +446,8 @@ timeResult='Actual Start Time(UTC+8):{0}\nActual End Time(UTC+8):{1}\nLog Start 
 #標題副標題,圖表結構,部分頻道和標題因字型問題無法完整顯示
 fig2, (ax3, ax4, ax5) = plt.subplots(3,sharex=True,figsize=(12.8,10.8))
 fig2.suptitle(chartTitle,fontname="MS Gothic", fontsize=15)
-fig2.set_facecolor('wheat')
-ax3.set_facecolor('moccasin')
+fig2.set_facecolor('paleturquoise')
+ax3.set_facecolor('lightcyan')
 ax3.set_title(countResult,loc='left', fontsize=12)
 ax3.set_title(timeResult,loc='right', fontsize=12)
 
@@ -461,7 +461,7 @@ ax3.ticklabel_format(axis='y', style='plain')
 ax3.grid(True)
 
 #圖表2
-ax4.set_facecolor('moccasin')
+ax4.set_facecolor('lightcyan')
 ax4.plot(t,v,'c',label='viewCount')
 ax4.legend(loc='upper left')
 ax4.ticklabel_format(axis='y', style='plain')
@@ -469,7 +469,7 @@ ax4.set_ylabel('count')
 ax4.grid(True)
 
 #圖表3
-ax5.set_facecolor('moccasin')
+ax5.set_facecolor('lightcyan')
 ax5.plot(t,c,'darkcyan',label='commentCount')
 ax5.legend(loc='upper left')
 ax5.ticklabel_format(axis='y', style='plain')
@@ -479,7 +479,7 @@ ax5.grid(True)
 #X軸簡化
 x = dfafter.time
 ticker_spacing = x
-ticker_spacing = 12
+ticker_spacing = 6
 ax5.xaxis.set_major_locator(ticker.MultipleLocator(ticker_spacing))
 plt.xticks(rotation=20, fontsize=7)
 plt.xlabel('time')
@@ -487,7 +487,7 @@ plt.xlabel('time')
 #儲存圖表
 fig2.tight_layout()
 print('---儲存折線圖---')
-plt.savefig('count chart after stream of' + TitleFileName + '.png')
+plt.savefig('count chart after stream of ' + TitleFileName + '.png')
 print('---儲存完成---')
 
 #結束後輸出

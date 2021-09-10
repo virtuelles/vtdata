@@ -487,7 +487,7 @@ plt.xlabel('time')
 #儲存圖表
 fig2.tight_layout()
 print('---儲存折線圖---')
-plt.savefig('count chart after stream of ' + TitleFileName + '.png')
+fig2.savefig('count chart after stream of ' + TitleFileName + '.png')
 print('---儲存完成---')
 
 #結束後輸出

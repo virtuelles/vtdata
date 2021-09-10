@@ -1,5 +1,11 @@
 # vtdata
-完成度還差很遠,堪用而已
+完成度還差很遠,堪用而已  
+20210910更新  
+  輸出圖片修改  
+  livestream,countafterstream,collectall整理統一  
+  livestream: 單爬直播數據  
+  countafterstream: 單爬直播後一天數據,支援一般影片  
+  collectall = livestream + countafterstream, 一次開一天以上  
 ## Youtube API 金鑰取得參考
 https://blog.jiatool.com/posts/youtube_spider_api/  
 推薦多申請幾個放到這裡，金鑰一天配額有上限，不過streamdata.py對配額的消耗不高  

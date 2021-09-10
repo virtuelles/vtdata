@@ -26,15 +26,14 @@ def sleep_time(hour, min, sec):
 
 def get_livestream_info(API_KEY,vID):
     '''
-     Use "videos" function to derive info of livestream,可能另做一個專爬liveinfo的
+    Use "videos" function to derive info of livestream
     '''
     params = {
-              'part': 'liveStreamingDetails,statistics,snippet',
-              'key': API_KEY,
-              'id': vID,
-              'fields': 'items(id,liveStreamingDetails(activeLiveChatId,concurrentViewers,scheduledStartTime,actualStartTime,actualEndTime),' + 
-              'snippet(channelId,channelTitle,liveBroadcastContent,publishedAt,title),statistics)'
-              }
+            'part': 'liveStreamingDetails,statistics,snippet',
+            'key': API_KEY,
+            'id': vID,
+            'fields': 'items(id,snippet(publishedAt,channelId,title,channelTitle,,liveBroadcastContent),statistics,liveStreamingDetails)'
+            }
     headers = {'User-Agent': 'Chrome/92.0.4515.107'}
     url = 'https://www.googleapis.com/youtube/v3/videos'
     req = requests.get(url, headers=headers, params=params).json()
@@ -84,7 +83,7 @@ if "actualStartTime" in sinfo['liveStreamingDetails']:
 #檢查直播是否開始
 liveBroadcastContent=sinfo['snippet']['liveBroadcastContent']
 
-notStartHold = sleep_time(0, 0, 30)
+notStartHold = sleep_time(0, 1, 0)
 while liveBroadcastContent=='none':
     print('直播已結束')
     break
@@ -92,7 +91,7 @@ while liveBroadcastContent=='upcoming':
     try:
         localtime = datetime.datetime.now().replace(microsecond=0).isoformat()
         localtime=localTimeClean(localtime)
-        print(localtime+'(UTC+8) 直播尚未開始,等待30秒後自動重新確認')
+        print(localtime+'(UTC+8) 直播尚未開始,等待一分鐘後自動重新確認')
         time.sleep(notStartHold)
         sinfo = get_livestream_info(API_KEY[apiKeySelect],vid)
         liveBroadcastContent=sinfo['snippet']['liveBroadcastContent']
@@ -180,7 +179,7 @@ while liveBroadcastContent=='live':
 streamData.close()
 #找同接最大值
 headers=['time','concurrentViewers','viewCount','likeCount','dislikeCount']
-df = pd.read_csv(TitleFileName+'.csv', names=headers,header=None,skiprows=1,usecols=[0,1,2,3,4])
+df = pd.read_csv(TitleFileName+'.csv', names=headers,header=None,usecols=[0,1,2,3,4])
 #csvRead=pd.read_csv(TitleFileName+'.csv')
 MaxConcurrentViewers=df['concurrentViewers'].max()
 
@@ -272,7 +271,7 @@ plt.xlabel('time')
 #儲存圖表
 fig.tight_layout()
 print('---儲存折線圖---')
-plt.savefig('chart of' + TitleFileName + '.png')
+plt.savefig('chart of ' + TitleFileName + '.png')
 print('---儲存完成---')
 
 #結束後輸出

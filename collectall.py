@@ -26,14 +26,13 @@ def sleep_time(hour, min, sec):
 
 def get_livestream_info(API_KEY,vID):
     '''
-    Use "videos" function to derive info of livestream,可能另做一個專爬liveinfo的
+    Use "videos" function to derive info of livestream
     '''
     params = {
             'part': 'liveStreamingDetails,statistics,snippet',
             'key': API_KEY,
             'id': vID,
-            'fields': 'items(id,liveStreamingDetails(activeLiveChatId,concurrentViewers,scheduledStartTime,actualStartTime,actualEndTime),' + 
-            'snippet(channelId,channelTitle,liveBroadcastContent,publishedAt,title),statistics)'
+            'fields': 'items(id,snippet(publishedAt,channelId,title,channelTitle,,liveBroadcastContent),statistics,liveStreamingDetails)'
             }
     headers = {'User-Agent': 'Chrome/92.0.4515.107'}
     url = 'https://www.googleapis.com/youtube/v3/videos'
@@ -376,6 +375,7 @@ for i in range(144):
         
         second = sleep_time(0, 10, 0)
         time.sleep(second)
+
     except KeyboardInterrupt:
         logStopTime = datetime.datetime.now().replace(microsecond=0).isoformat()
         logStopTime=localTimeClean(logStopTime)
@@ -515,7 +515,7 @@ else:
     print('直播結束時間 Actual End Time(UTC+8):NaN\n')
 
 
-print('紀錄結束時間 Log Stop Time(UTC+8): '+str(logStopTime))
+print('紀錄結束時間 Log Stop Time(UTC+8): '+str(logStopTime)+'\n')
 
 if "viewCount" in sinfo['statistics']:
     print('紀錄結束時播放數 View Count:', sinfo['statistics']['viewCount'])

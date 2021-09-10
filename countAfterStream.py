@@ -246,7 +246,7 @@ ax3.grid(True)
 
 #圖表2
 ax4.set_facecolor('lightcyan')
-ax4.plot(t,v,'c',label='viewCount')
+ax4.plot(t,v,'indigo',label='viewCount')
 ax4.legend(loc='upper left')
 ax4.ticklabel_format(axis='y', style='plain')
 ax4.set_ylabel('count')
@@ -254,7 +254,7 @@ ax4.grid(True)
 
 #圖表3
 ax5.set_facecolor('lightcyan')
-ax5.plot(t,c,'darkcyan',label='commentCount')
+ax5.plot(t,c,'darkblue',label='commentCount')
 ax5.legend(loc='upper left')
 ax5.ticklabel_format(axis='y', style='plain')
 ax5.set_ylabel('count')

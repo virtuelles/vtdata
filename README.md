@@ -9,6 +9,7 @@
 ## Youtube API 金鑰取得參考
 https://blog.jiatool.com/posts/youtube_spider_api/  
 推薦多申請幾個放到這裡，金鑰一天配額有上限，不過streamdata.py對配額的消耗不高  
+不要用太多個,會被ban  
 偶爾上google cloud platform確認消耗了多少就行  
 https://console.cloud.google.com/iam-admin/quotas?service=youtube.googleapis.com
 ```

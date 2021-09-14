@@ -30,7 +30,7 @@ python streamdata.py
 ![](https://i.imgur.com/vMPjGTb.png)  
 ![](https://i.imgur.com/Urn42L0.png)  
 直播結束後或手動跳出時自動生成圖表  
-![](https://i.imgur.com/3c2djsx.png)  
+![](https://i.imgur.com/cQUNW4T.png)  
 > vtdata(或是看你想放在哪個資料夾)
 >> 頻道名稱資料夾
 >>> 直播標題資料夾
@@ -42,7 +42,7 @@ python streamdata.py
 基本上操作一樣,也可用於爬取影片,輸出view,like,dislike,comment  
 預設間格為10分鐘  
 儲存位置相同  
-![](https://i.imgur.com/qQIfWIy.png)  
+![](https://i.imgur.com/C6Bmo99.png)  
 > vtdata(或是看你想放在哪個資料夾)
 >> 頻道名稱資料夾
 >>> 直播標題資料夾

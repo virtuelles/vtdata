@@ -47,7 +47,7 @@ localtime=localTimeClean(localtime)
 print('運作開始時間start at(UTC+8): '+localtime)
 
 #輸入API,可以多申請幾個使用
-API_KEY = ['XXXXX','XXXXX']
+API_KEY = [ 'XXXXX','XXXXX']
 
 apiKeySelect=int(input('選擇要使用的APIKEY(從0開始):'))
 #輸入直播網址ID
@@ -174,6 +174,8 @@ while liveBroadcastContent=='live':
         print('---手動跳出紀錄---')
         break
     except:
+        second = sleep_time(0, 0, 9)
+        time.sleep(second)
         continue
 
 streamData.close()
@@ -382,6 +384,8 @@ for i in range(144):
         print('---手動跳出紀錄---')
         break
     except:
+        second = sleep_time(0, 10, 0)
+        time.sleep(second)
         continue
 
 countAfterStream.close()

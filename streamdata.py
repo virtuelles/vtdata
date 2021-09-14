@@ -174,6 +174,8 @@ while liveBroadcastContent=='live':
         print('---手動跳出紀錄---')
         break
     except:
+        second = sleep_time(0, 0, 9)
+        time.sleep(second)
         continue
 
 streamData.close()

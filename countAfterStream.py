@@ -162,6 +162,8 @@ for i in range(144):
         print('---手動跳出紀錄---')
         break
     except:
+        second = sleep_time(0, 10, 0)
+        time.sleep(second)
         continue
 
 countAfterStream.close()

@@ -90,18 +90,36 @@ while liveBroadcastContent=='none':
 while liveBroadcastContent=='upcoming':
     try:
         localtime = datetime.datetime.now().replace(microsecond=0).isoformat()
-        localtime=localTimeClean(localtime)
-        print(localtime+'(UTC+8) 直播尚未開始,等待一分鐘後自動重新確認')
-        time.sleep(notStartHold)
+        localtime = localTimeClean(localtime)
+        localtime = datetime.datetime.strptime(localtime,"%Y-%m-%d %H:%M:%S")
+        if "scheduledStartTime" in sinfo['liveStreamingDetails']:
+            Planed_Start_Time=sinfo['liveStreamingDetails']['scheduledStartTime']
+            Planed_Start_Time=APItimeSetToUTC8(Planed_Start_Time)
+        else:
+            Planed_Start_Time='NaN'
+        #print(localtime)
+        #print(Planed_Start_Time)
+        delta = Planed_Start_Time - localtime
+        print('剩餘多少時間開始: ',delta.total_seconds(),'秒')
+        
+        if delta.total_seconds() >0:
+            print('現在時間: ',str(localtime),'(UTC+8) 直播於', delta ,'後開始,','將等待', delta )
+            time.sleep(delta.total_seconds())
+        else:
+            print('現在時間: ',str(localtime),'(UTC+8) 直播尚未開始,等待一分鐘後檢查')
+            time.sleep(notStartHold)
         sinfo = get_livestream_info(API_KEY[apiKeySelect],vid)
         liveBroadcastContent=sinfo['snippet']['liveBroadcastContent']
+        if liveBroadcastContent == 'live':
+            break
     except KeyboardInterrupt:
         print('---在等待直播開始時手動跳出,接下來的執行會出問題---')
         break
     except:
+        print('八成出了bug')
+        notStartHold = sleep_time(0, 1, 0)
+        time.sleep(notStartHold)
         continue
-    if liveBroadcastContent == 'live':
-        break
 
 Title=sinfo['snippet']['title']
 TitleFileName=re.sub('[\/:*?"<>|]',' ',Title)

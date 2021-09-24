@@ -55,7 +55,6 @@ vid=input('輸入直播ID:')
 # 取得直播資訊
 sinfo = get_livestream_info(str(API_KEY[apiKeySelect]),vid)
 
-
 Channel=sinfo['snippet']['channelTitle']
 channelFileName=re.sub('[\/:*?"<>|]',' ',Channel)
 
@@ -70,22 +69,29 @@ else:
     os.mkdir(channelFileName)
     os.chdir(channelFileName)
 
-if "scheduledStartTime" in sinfo['liveStreamingDetails']:
-    Planed_Start_Time=sinfo['liveStreamingDetails']['scheduledStartTime']
-    Planed_Start_Time=APItimeSetToUTC8(Planed_Start_Time)
-else:
-    Planed_Start_Time='NaN'
+try:
+    if "scheduledStartTime" in sinfo['liveStreamingDetails']:
+        Planed_Start_Time=sinfo['liveStreamingDetails']['scheduledStartTime']
+        Planed_Start_Time=APItimeSetToUTC8(Planed_Start_Time)
+    else:
+        Planed_Start_Time='NaN'
 
-if "actualStartTime" in sinfo['liveStreamingDetails']:
-    Actual_Start_Time=sinfo['liveStreamingDetails']['actualStartTime']
-    Actual_Start_Time=APItimeSetToUTC8(Actual_Start_Time)
+    if "actualStartTime" in sinfo['liveStreamingDetails']:
+        Actual_Start_Time=sinfo['liveStreamingDetails']['actualStartTime']
+        Actual_Start_Time=APItimeSetToUTC8(Actual_Start_Time)
+except:
+    Planed_Start_Time='NaN'
+    Actual_Start_Time='NaN'
 
 #檢查直播是否開始
 liveBroadcastContent=sinfo['snippet']['liveBroadcastContent']
 
 notStartHold = sleep_time(0, 1, 0)
 while liveBroadcastContent=='none':
+    Title=sinfo['snippet']['title']
     print('直播已結束')
+    print('Channel: ',Channel)
+    print('Tilte: ',Title)
     break
 while liveBroadcastContent=='upcoming':
     try:
@@ -127,11 +133,16 @@ while liveBroadcastContent=='upcoming':
 
 Title=sinfo['snippet']['title']
 TitleFileName=re.sub('[\/:*?"<>|]',' ',Title)
-Actual_Start_Time=sinfo['liveStreamingDetails']['actualStartTime']
-Actual_Start_Time=APItimeSetToUTC8(Actual_Start_Time)
+try:
+    Actual_Start_Time=sinfo['liveStreamingDetails']['actualStartTime']
+    Actual_Start_Time=APItimeSetToUTC8(Actual_Start_Time)
 
-ActualStartTimeFileName=datetime.datetime.strftime(Actual_Start_Time,'%Y-%m-%d %H:%M:%S ')
-ActualStartTimeFileName=ActualStartTimeFileName[0:10]
+    ActualStartTimeFileName=datetime.datetime.strftime(Actual_Start_Time,'%Y-%m-%d %H:%M:%S ')
+    ActualStartTimeFileName=ActualStartTimeFileName[0:10]
+except:
+    Actual_Start_Time='NaN'
+    ActualStartTimeFileName=datetime.datetime.strftime(Stream_Created,'%Y-%m-%d %H:%M:%S ')
+    ActualStartTimeFileName=ActualStartTimeFileName[0:10]
 
 if os.path.isdir(ActualStartTimeFileName+' '+TitleFileName):
     os.chdir(ActualStartTimeFileName+' '+TitleFileName)
@@ -437,11 +448,15 @@ countAfterStream.close()
 logStopTime = datetime.datetime.now().replace(microsecond=0).isoformat()
 logStopTime=localTimeClean(logStopTime)
 #info寫入
-if "actualEndTime" in sinfo['liveStreamingDetails']:
-    Actual_End_Time=sinfo['liveStreamingDetails']['actualEndTime']
-    Actual_End_Time=APItimeSetToUTC8(Actual_End_Time)
-    countInfo.write('直播結束時間 Actual End Time(UTC+8):'+str(Actual_End_Time)+'\n')
-else:
+try:
+    if "actualEndTime" in sinfo['liveStreamingDetails']:
+        Actual_End_Time=sinfo['liveStreamingDetails']['actualEndTime']
+        Actual_End_Time=APItimeSetToUTC8(Actual_End_Time)
+        countInfo.write('直播結束時間 Actual End Time(UTC+8):'+str(Actual_End_Time)+'\n')
+    else:
+        Actual_End_Time='NaN'
+        countInfo.write('直播結束時間 Actual End Time(UTC+8):NaN\n')
+except:
     Actual_End_Time='NaN'
     countInfo.write('直播結束時間 Actual End Time(UTC+8):NaN\n')
 
@@ -556,23 +571,25 @@ if "publishedAt" in sinfo['snippet']:
     print('直播公開時間 Stream Created Time(UTC+8):', Stream_Created)
 else:
     print('直播公開時間 Stream Created Time(UTC+8):NaN')
+try:
+    if "scheduledStartTime" in sinfo['liveStreamingDetails']:
+        print('預定開始時間 Planed Start Time(UTC+8):', Planed_Start_Time)
+    else:
+        print('預定開始時間 Planed Start Time(UTC+8):NaN')
 
-if "scheduledStartTime" in sinfo['liveStreamingDetails']:
-    print('預定開始時間 Planed Start Time(UTC+8):', Planed_Start_Time)
-else:
+    if "actualStartTime" in sinfo['liveStreamingDetails']:
+        print('實際開始時間 Actual Start Time(UTC+8):', Actual_Start_Time)
+    else:
+        print('實際開始時間 Actual Start Time(UTC+8):NaN')
+
+    if "actualEndTime" in sinfo['liveStreamingDetails']:
+        print('直播結束時間 Actual End Time(UTC+8):', Actual_End_Time)
+    else:
+        print('直播結束時間 Actual End Time(UTC+8):NaN\n')
+except:
     print('預定開始時間 Planed Start Time(UTC+8):NaN')
-
-if "actualStartTime" in sinfo['liveStreamingDetails']:
-    print('實際開始時間 Actual Start Time(UTC+8):', Actual_Start_Time)
-else:
     print('實際開始時間 Actual Start Time(UTC+8):NaN')
-
-if "actualEndTime" in sinfo['liveStreamingDetails']:
-    print('直播結束時間 Actual End Time(UTC+8):', Actual_End_Time)
-else:
-    print('直播結束時間 Actual End Time(UTC+8):NaN\n')
-
-
+    print('直播結束時間 Actual End Time(UTC+8):NaN')
 print('紀錄結束時間 Log Stop Time(UTC+8): '+str(logStopTime)+'\n')
 
 if "viewCount" in sinfo['statistics']:

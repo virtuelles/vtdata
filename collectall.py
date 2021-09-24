@@ -100,6 +100,10 @@ while liveBroadcastContent=='upcoming':
         #print(localtime)
         #print(Planed_Start_Time)
         delta = Planed_Start_Time - localtime
+        Title=sinfo['snippet']['title']
+
+        print('Channel: ',Channel)
+        print('Tilte: ',Title)
         print('剩餘多少時間開始: ',delta.total_seconds(),'秒')
         
         if delta.total_seconds() >0:
@@ -345,6 +349,8 @@ if "dislikeCount" in sinfo['statistics']:
 else:
     print('紀錄結束時不喜歡數 DislikeCount:NaN')
 
+print('~~~直播記錄結束,直播後記錄開始~~~')
+
 #開啟csv檔寫入直播後數據
 countAfterStream=open('count after stream of '+TitleFileName+'.csv', 'a', newline='', encoding='UTF-8')
 #countAfterStream.write('time,viewCount,likeCount,dislikeCount\n')
@@ -361,6 +367,15 @@ Log_Start_Time=localTimeClean(Log_Start_Time)
 countInfo.write('紀錄開始時間 Log Start Time(UTC+8):'+Log_Start_Time+'\n')
 
 #寫入csv,預設一天,144*10min
+
+viewCount150min=0
+likeCount150min=0
+dislikeCount150min=0
+commentCount150min=0
+viewCount180min=0
+likeCount180min=0
+dislikeCount180min=0
+commentCount180min=0
 
 for i in range(144):
 
@@ -389,6 +404,17 @@ for i in range(144):
             commentCount=sinfo['statistics']['commentCount']
         else:
             commentCount=0
+        
+        if i == 14:
+            viewCount150min=viewCount
+            likeCount150min=likeCount
+            dislikeCount150min=dislikeCount
+            commentCount150min=commentCount
+        if i == 17:
+            viewCount180min=viewCount
+            likeCount180min=likeCount
+            dislikeCount180min=dislikeCount
+            commentCount180min=commentCount
 
         countAfterStream.write(str(localtime)+','+str(viewCount)+','+str(likeCount)+','+str(dislikeCount)+','+str(commentCount)+'\n')
         print(str(localtime)+','+str(viewCount)+','+str(likeCount)+','+str(dislikeCount)+','+str(commentCount))
@@ -421,6 +447,16 @@ else:
 
 countInfo.write('紀錄結束時間 Log stop Time(UTC+8):'+str(logStopTime)+'\n')
 
+countInfo.write('紀錄於2.5hr時播放數 View Count:'+str(viewCount150min)+'\n')
+countInfo.write('紀錄於2.5hr時喜歡數 Like Count:'+str(likeCount150min)+'\n')
+countInfo.write('紀錄於2.5hr時不喜歡數 Dislike Count:'+str(dislikeCount150min)+'\n')
+countInfo.write('紀錄於2.5hr時留言數 Comment Count:'+str(commentCount150min)+'\n')
+
+countInfo.write('紀錄於3hr時播放數 View Count:'+str(viewCount180min)+'\n')
+countInfo.write('紀錄於3hr時喜歡數 Like Count:'+str(likeCount180min)+'\n')
+countInfo.write('紀錄於3hr時不喜歡數 Dislike Count:'+str(dislikeCount180min)+'\n')
+countInfo.write('紀錄於3hr時留言數 Comment Count:'+str(commentCount180min)+'\n')
+
 if "viewCount" in sinfo['statistics']:
     countInfo.write('紀錄結束時播放數 View Count:'+str(viewCount)+'\n')
 else:
@@ -445,7 +481,7 @@ countInfo.close()
 
 
 #繪圖
-chartTitle='Channel: '+Channel+'\n'+'Title: '+Title+'\n'+'Count after stream'
+chartTitle='Channel: '+Channel+'\n'+'Title: '+Title+'\n'+'Count for 1 day'
 
 #這裡應該能簡化
 headers=['time','viewCount','likeCount','dislikeCount','commentCount']
@@ -462,7 +498,7 @@ MaxViewCount=dfafter['viewCount'].max()
 MaxLikeCount=dfafter['likeCount'].max()
 MaxDislikeCount=dfafter['dislikeCount'].max()
 MaxCommentCount=dfafter['commentCount'].max()
-countResult='MaxLikeCount:{0}\nMaxDislikeCount:{1}\nMaxViewCount:{2}\nMaxCommentCount:{3}'.format(MaxLikeCount,MaxDislikeCount,MaxViewCount,MaxCommentCount)
+countResult='MaxLikeCount:{0}\nMaxDislikeCount:{1}\nViewCountAt2.5hr:{2}\nViewCountAt3hr:{3}\nMaxViewCount:{4}\nMaxCommentCount:{5}'.format(MaxLikeCount,MaxDislikeCount,viewCount150min,viewCount180min,MaxViewCount,MaxCommentCount)
 timeResult='Actual Start Time(UTC+8):{0}\nActual End Time(UTC+8):{1}\nLog Start Time(UTC+8):{2}\nLog Stop Time(UTC+8):{3}'.format(Actual_Start_Time,Actual_End_Time,Log_Start_Time,logStopTime)
 
 #標題副標題,圖表結構,部分頻道和標題因字型問題無法完整顯示

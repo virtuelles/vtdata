@@ -55,7 +55,6 @@ vid=input('輸入直播ID:')
 # 取得直播資訊
 sinfo = get_livestream_info(str(API_KEY[apiKeySelect]),vid)
 
-
 Channel=sinfo['snippet']['channelTitle']
 channelFileName=re.sub('[\/:*?"<>|]',' ',Channel)
 
@@ -70,22 +69,29 @@ else:
     os.mkdir(channelFileName)
     os.chdir(channelFileName)
 
-if "scheduledStartTime" in sinfo['liveStreamingDetails']:
-    Planed_Start_Time=sinfo['liveStreamingDetails']['scheduledStartTime']
-    Planed_Start_Time=APItimeSetToUTC8(Planed_Start_Time)
-else:
-    Planed_Start_Time='NaN'
+try:
+    if "scheduledStartTime" in sinfo['liveStreamingDetails']:
+        Planed_Start_Time=sinfo['liveStreamingDetails']['scheduledStartTime']
+        Planed_Start_Time=APItimeSetToUTC8(Planed_Start_Time)
+    else:
+        Planed_Start_Time='NaN'
 
-if "actualStartTime" in sinfo['liveStreamingDetails']:
-    Actual_Start_Time=sinfo['liveStreamingDetails']['actualStartTime']
-    Actual_Start_Time=APItimeSetToUTC8(Actual_Start_Time)
+    if "actualStartTime" in sinfo['liveStreamingDetails']:
+        Actual_Start_Time=sinfo['liveStreamingDetails']['actualStartTime']
+        Actual_Start_Time=APItimeSetToUTC8(Actual_Start_Time)
+except:
+    Planed_Start_Time='NaN'
+    Actual_Start_Time='NaN'
 
 #檢查直播是否開始
 liveBroadcastContent=sinfo['snippet']['liveBroadcastContent']
 
 notStartHold = sleep_time(0, 1, 0)
 while liveBroadcastContent=='none':
+    Title=sinfo['snippet']['title']
     print('直播已結束')
+    print('Channel: ',Channel)
+    print('Tilte: ',Title)
     break
 while liveBroadcastContent=='upcoming':
     try:
@@ -100,6 +106,10 @@ while liveBroadcastContent=='upcoming':
         #print(localtime)
         #print(Planed_Start_Time)
         delta = Planed_Start_Time - localtime
+        Title=sinfo['snippet']['title']
+        
+        print('Channel: ',Channel)
+        print('Tilte: ',Title)
         print('剩餘多少時間開始: ',delta.total_seconds(),'秒')
         
         if delta.total_seconds() >0:
@@ -123,11 +133,16 @@ while liveBroadcastContent=='upcoming':
 
 Title=sinfo['snippet']['title']
 TitleFileName=re.sub('[\/:*?"<>|]',' ',Title)
-Actual_Start_Time=sinfo['liveStreamingDetails']['actualStartTime']
-Actual_Start_Time=APItimeSetToUTC8(Actual_Start_Time)
+try:
+    Actual_Start_Time=sinfo['liveStreamingDetails']['actualStartTime']
+    Actual_Start_Time=APItimeSetToUTC8(Actual_Start_Time)
 
-ActualStartTimeFileName=datetime.datetime.strftime(Actual_Start_Time,'%Y-%m-%d %H:%M:%S ')
-ActualStartTimeFileName=ActualStartTimeFileName[0:10]
+    ActualStartTimeFileName=datetime.datetime.strftime(Actual_Start_Time,'%Y-%m-%d %H:%M:%S ')
+    ActualStartTimeFileName=ActualStartTimeFileName[0:10]
+except:
+    Actual_Start_Time='NaN'
+    ActualStartTimeFileName=datetime.datetime.strftime(Stream_Created,'%Y-%m-%d %H:%M:%S ')
+    ActualStartTimeFileName=ActualStartTimeFileName[0:10]
 
 if os.path.isdir(ActualStartTimeFileName+' '+TitleFileName):
     os.chdir(ActualStartTimeFileName+' '+TitleFileName)

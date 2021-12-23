@@ -308,7 +308,7 @@ plt.xlabel('time')
 #儲存圖表
 fig.tight_layout()
 print('---儲存折線圖---')
-plt.savefig('stream chart of ' + TitleFileName + '.png')
+plt.savefig('SC_' + TitleFileName + '.png')
 print('---儲存完成---')
 
 #結束後輸出
@@ -564,7 +564,7 @@ plt.xlabel('time')
 #儲存圖表
 fig2.tight_layout()
 print('---儲存折線圖---')
-fig2.savefig('count chart after stream of ' + TitleFileName + '.png')
+fig2.savefig('CCAS_' + TitleFileName + '.png')
 print('---儲存完成---')
 
 #結束後輸出

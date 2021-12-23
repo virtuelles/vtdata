@@ -3,7 +3,7 @@
 20211223更新  
   dislike註解掉和調整  
   fileopen調整  
-  info順序調整
+  info順序調整  
 20210910更新  
   輸出圖片修改  
   livestream,countafterstream,collectall整理統一  

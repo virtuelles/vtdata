@@ -47,7 +47,8 @@ localtime=localTimeClean(localtime)
 print('運作開始時間start at(UTC+8): '+localtime)
 
 #輸入API,可以多申請幾個使用
-API_KEY = [ 'XXXXX','XXXXX']
+
+API_KEY = ['XXXXX','XXXXX']
 
 apiKeySelect=int(input('選擇要使用的APIKEY(從0開始):'))
 #輸入直播網址ID
@@ -150,106 +151,107 @@ else:
     os.mkdir(ActualStartTimeFileName+' '+TitleFileName)
     os.chdir(ActualStartTimeFileName+' '+TitleFileName)
 
-#開啟csv檔寫入直播數據
-streamData=open(TitleFileName+'.csv', 'a', newline='', encoding='UTF-8')
-#streamData.write('time,concurrentViewers,viewCount,likeCount,dislikeCount\n')
-
 #開啟txt檔寫入直播資訊
-streamInfo=open('info of '+TitleFileName+'.txt', 'a', newline='', encoding='UTF-8')
-streamInfoCollectstart=['頻道 Channel:',Channel,'\n','標題 Title:',Title,'\n','影片ID Video_ID:',Video_ID,'\n','直播公開時間 Stream Created time(UTC+8):',str(Stream_Created),'\n','預定開始時間 Planed Start Time(UTC+8):',str(Planed_Start_Time),'\n']
-streamInfo.writelines(streamInfoCollectstart)
+with open('SI_'+TitleFileName+'.txt', 'a', newline='', encoding='UTF-8') as streamInfo:
+    streamInfoCollectstart=['Video_ID:',Video_ID,'\n','Stream Created time(UTC+8):',str(Stream_Created),'\n','Planed Start Time(UTC+8):',str(Planed_Start_Time),'\n']
+    streamInfo.writelines(streamInfoCollectstart)
 
-streamInfoCollectAST=['實際開始時間 Actual Start Time(UTC+8):',str(Actual_Start_Time),'\n']
-streamInfo.writelines(streamInfoCollectAST)
-Log_Start_Time = datetime.datetime.now().replace(microsecond=0).isoformat()
-Log_Start_Time=localTimeClean(Log_Start_Time)
-streamInfo.write('紀錄開始時間 Log Start Time(UTC+8):'+Log_Start_Time+'\n')
+    streamInfoCollectAST=['Actual Start Time(UTC+8):',str(Actual_Start_Time),'\n']
+    streamInfo.writelines(streamInfoCollectAST)
+    Log_Start_Time = datetime.datetime.now().replace(microsecond=0).isoformat()
+    Log_Start_Time=localTimeClean(Log_Start_Time)
+    streamInfo.write('Log Start Time(UTC+8):'+Log_Start_Time+'\n')
+#開啟csv檔寫入直播數據
+with open('SD_'+TitleFileName+'.csv', 'a', newline='', encoding='UTF-8') as streamData:
+    #streamData.write('time,concurrentViewers,viewCount,likeCount,dislikeCount\n')
 
-#直播開始後寫入csv
-while liveBroadcastContent=='live':
+    #直播開始後寫入csv
+    while liveBroadcastContent=='live':
 
-    try:
-        localtime = datetime.datetime.now().replace(microsecond=0).isoformat()
-        localtime=localTimeClean(localtime)
-        if liveBroadcastContent != 'live':
+        try:
+            localtime = datetime.datetime.now().replace(microsecond=0).isoformat()
+            localtime=localTimeClean(localtime)
+            if liveBroadcastContent != 'live':
+                break
+            sinfo = get_livestream_info(API_KEY[apiKeySelect],vid)
+            liveBroadcastContent=sinfo['snippet']['liveBroadcastContent']
+
+            if "concurrentViewers" in sinfo['liveStreamingDetails']:
+                concurrentViewers=sinfo['liveStreamingDetails']['concurrentViewers']
+            else:
+                concurrentViewers=0
+            
+            if "viewCount" in sinfo['statistics']:
+                viewCount=sinfo['statistics']['viewCount']
+            else:
+                viewCount=0
+
+            if "likeCount" in sinfo['statistics']:
+                likeCount=sinfo['statistics']['likeCount']
+            else:
+                likeCount=0
+
+            '''if "dislikeCount" in sinfo['statistics']:
+                dislikeCount=sinfo['statistics']['dislikeCount']
+            else:
+                dislikeCount=0'''
+
+            streamData.write(str(localtime)+','+str(concurrentViewers)+','+str(viewCount)+','+str(likeCount)+'\n')
+            print(str(localtime)+','+str(concurrentViewers)+','+str(viewCount)+','+str(likeCount))
+            
+            second = sleep_time(0, 0, 9)
+            time.sleep(second)
+        except KeyboardInterrupt:
+            logStopTime = datetime.datetime.now().replace(microsecond=0).isoformat()
+            logStopTime=localTimeClean(logStopTime)
+            print('---手動跳出紀錄---')
             break
-        sinfo = get_livestream_info(API_KEY[apiKeySelect],vid)
-        liveBroadcastContent=sinfo['snippet']['liveBroadcastContent']
-
-        if "concurrentViewers" in sinfo['liveStreamingDetails']:
-            concurrentViewers=sinfo['liveStreamingDetails']['concurrentViewers']
-        else:
-            concurrentViewers=0
-        
-        if "viewCount" in sinfo['statistics']:
-            viewCount=sinfo['statistics']['viewCount']
-        else:
-            viewCount=0
-
-        if "likeCount" in sinfo['statistics']:
-            likeCount=sinfo['statistics']['likeCount']
-        else:
-            likeCount=0
-
-        if "dislikeCount" in sinfo['statistics']:
-            dislikeCount=sinfo['statistics']['dislikeCount']
-        else:
-            dislikeCount=0
-
-        streamData.write(str(localtime)+','+str(concurrentViewers)+','+str(viewCount)+','+str(likeCount)+','+str(dislikeCount)+'\n')
-        print(str(localtime)+','+str(concurrentViewers)+','+str(viewCount)+','+str(likeCount)+','+str(dislikeCount))
-        
-        second = sleep_time(0, 0, 9)
-        time.sleep(second)
-    except KeyboardInterrupt:
-        logStopTime = datetime.datetime.now().replace(microsecond=0).isoformat()
-        logStopTime=localTimeClean(logStopTime)
-        print('---手動跳出紀錄---')
-        break
-    except:
-        second = sleep_time(0, 0, 9)
-        time.sleep(second)
-        continue
-
-streamData.close()
+        except:
+            print('可能連線錯誤')
+            second = sleep_time(0, 0, 9)
+            time.sleep(second)
+            continue
 #找同接最大值
-headers=['time','concurrentViewers','viewCount','likeCount','dislikeCount']
-df = pd.read_csv(TitleFileName+'.csv', names=headers,header=None,usecols=[0,1,2,3,4])
+headers=['time','concurrentViewers','viewCount','likeCount']
+df = pd.read_csv('SD_'+TitleFileName+'.csv', names=headers,header=None,usecols=[0,1,2,3])
 #csvRead=pd.read_csv(TitleFileName+'.csv')
 MaxConcurrentViewers=df['concurrentViewers'].max()
 
 logStopTime = datetime.datetime.now().replace(microsecond=0).isoformat()
 logStopTime=localTimeClean(logStopTime)
 #info寫入
-if "actualEndTime" in sinfo['liveStreamingDetails']:
-    Actual_End_Time=sinfo['liveStreamingDetails']['actualEndTime']
-    Actual_End_Time=APItimeSetToUTC8(Actual_End_Time)
-    streamInfo.write('直播結束時間 Actual End Time(UTC+8):'+str(Actual_End_Time)+'\n')
-else:
-    Actual_End_Time='NaN'
-    streamInfo.write('直播結束時間 Actual End Time(UTC+8):NaN\n')
+with open('SI_'+TitleFileName+'.txt', 'a', newline='', encoding='UTF-8') as streamInfo:
+    if "actualEndTime" in sinfo['liveStreamingDetails']:
+        Actual_End_Time=sinfo['liveStreamingDetails']['actualEndTime']
+        Actual_End_Time=APItimeSetToUTC8(Actual_End_Time)
+        streamInfo.write('Actual End Time(UTC+8):'+str(Actual_End_Time)+'\n')
+    else:
+        Actual_End_Time='NaN'
+        streamInfo.write('Actual End Time(UTC+8):NaN\n')
 
-streamInfo.write('紀錄結束時間 Log stop Time(UTC+8):'+str(logStopTime)+'\n')
+    streamInfo.write('Log stop Time(UTC+8):'+str(logStopTime)+'\n')
 
-streamInfo.write('紀錄結束時最高同時觀看人數 Max Concurrent Viewers:'+str(MaxConcurrentViewers)+'\n')
+    sinfo = get_livestream_info(API_KEY[apiKeySelect],vid)
+    Title=sinfo['snippet']['title']
+    streamInfo.write('Channel:'+str(Channel)+'\n')
+    streamInfo.write('Title:'+str(Title)+'\n')
 
-if "viewCount" in sinfo['statistics']:
-    streamInfo.write('紀錄結束時播放數 View Count:'+str(viewCount)+'\n')
-else:
-    streamInfo.write('紀錄結束時播放數 View Count:NaN'+'\n')
+    streamInfo.write('Max Concurrent Viewers:'+str(MaxConcurrentViewers)+'\n')
 
-if "likeCount" in sinfo['statistics']:
-    streamInfo.write('紀錄結束時喜歡數 Like Count:'+str(likeCount)+'\n')
-else:
-    streamInfo.write('紀錄結束時喜歡數 Like Count:NaN'+'\n')
+    if "viewCount" in sinfo['statistics']:
+        streamInfo.write('View Count:'+str(viewCount)+'\n')
+    else:
+        streamInfo.write('View Count:NaN'+'\n')
 
-if "dislikeCount" in sinfo['statistics']:
-    streamInfo.write('紀錄結束時不喜歡數 Dislike Count:'+str(dislikeCount)+'\n')
-else:
-    streamInfo.write('紀錄結束時不喜歡數 Dislike Count:NaN'+'\n')
+    if "likeCount" in sinfo['statistics']:
+        streamInfo.write('Like Count:'+str(likeCount)+'\n')
+    else:
+        streamInfo.write('Like Count:NaN'+'\n')
 
-streamInfo.close()
-
+    '''if "dislikeCount" in sinfo['statistics']:
+        streamInfo.write('Dislike Count:'+str(dislikeCount)+'\n')
+    else:
+        streamInfo.write('Dislike Count(R.I.P):NaN'+'\n')'''
 
 #繪圖
 chartTitle='Channel: '+Channel+'\n'+'Title: '+Title+'\n'
@@ -260,13 +262,13 @@ t = df['time']
 c = df['concurrentViewers']
 v = df['viewCount']
 l = df['likeCount']
-d = df['dislikeCount']
+#d = df['dislikeCount']
 
 MaxConcurrentViewers=df['concurrentViewers'].max()
 MaxViewCount=df['viewCount'].max()
 MaxLikeCount=df['likeCount'].max()
-MaxDislikeCount=df['dislikeCount'].max()
-countResult='MaxConcurrentViewers:{0}\nMaxLikeCount:{1}\nMaxDislikeCount:{2}\nMaxViewCount:{3}'.format(MaxConcurrentViewers,MaxLikeCount,MaxDislikeCount,MaxViewCount)
+#MaxDislikeCount=df['dislikeCount'].max()
+countResult='MaxConcurrentViewers:{0}\nMaxLikeCount:{1}\nMaxViewCount:{2}'.format(MaxConcurrentViewers,MaxLikeCount,MaxViewCount)
 timeResult='Planed Start Time(UTC+8):{0}\nActual Start Time(UTC+8):{1}\nLog Start Time(UTC+8):{2}\nActual End Time(UTC+8):{3}'.format(Planed_Start_Time,Actual_Start_Time,Log_Start_Time,Actual_End_Time)
 
 #標題副標題,圖表結構,部分頻道和標題因字型問題無法完整顯示
@@ -281,7 +283,7 @@ ax1.set_title(timeResult,loc='right', fontsize=12)
 ax1.set_ylabel('count')
 ax1.plot(t,c,'b',label='concurrentViewers')
 ax1.plot(t,l,'g',label='likeCount')
-ax1.plot(t,d,'r',label='dislikeCount')
+#ax1.plot(t,d,'r',label='dislikeCount')
 ax1.legend(loc='upper left')
 ax1.ticklabel_format(axis='y', style='plain')
 ax1.grid(True)
@@ -306,34 +308,34 @@ plt.xlabel('time')
 #儲存圖表
 fig.tight_layout()
 print('---儲存折線圖---')
-plt.savefig('chart of ' + TitleFileName + '.png')
+plt.savefig('stream chart of ' + TitleFileName + '.png')
 print('---儲存完成---')
 
 #結束後輸出
-print('頻道 Channel:', sinfo['snippet']['channelTitle'])
-print('標題 Title:', sinfo['snippet']['title'])
-print('影片ID Video ID:', sinfo['id'])
+print('Channel:', sinfo['snippet']['channelTitle'])
+print('Title:', sinfo['snippet']['title'])
+print('Video ID:', sinfo['id'])
 if "publishedAt" in sinfo['snippet']:
-    print('直播公開時間 Stream Created Time(UTC+8):', Stream_Created)
+    print('Stream Created Time(UTC+8):', Stream_Created)
 else:
-    print('直播公開時間 Stream Created Time(UTC+8):NaN')
+    print('Stream Created Time(UTC+8):NaN')
 
 if "scheduledStartTime" in sinfo['liveStreamingDetails']:
-    print('預定開始時間 Planed Start Time(UTC+8):', Planed_Start_Time)
+    print('Planed Start Time(UTC+8):', Planed_Start_Time)
 else:
-    print('預定開始時間 Planed Start Time(UTC+8):NaN')
+    print('Planed Start Time(UTC+8):NaN')
 
 if "actualStartTime" in sinfo['liveStreamingDetails']:
-    print('實際開始時間 Actual Start Time(UTC+8):', Actual_Start_Time)
+    print('Actual Start Time(UTC+8):', Actual_Start_Time)
 else:
-    print('實際開始時間 Actual Start Time(UTC+8):NaN')
+    print('Actual Start Time(UTC+8):NaN')
 
 if "actualEndTime" in sinfo['liveStreamingDetails']:
-    print('直播結束時間 Actual End Time(UTC+8):', Actual_End_Time)
+    print('Actual End Time(UTC+8):', Actual_End_Time)
 else:
-    print('直播結束時間 Actual End Time(UTC+8):NaN\n')
+    print('Actual End Time(UTC+8):NaN')
 
-print('紀錄結束時間 Log Stop Time(UTC+8): '+str(logStopTime))
+print('Log Stop Time(UTC+8): '+str(logStopTime))
 
 #print('是否在直播 liveBroadcastContent:', sinfo['snippet']['liveBroadcastContent'])
 '''
@@ -343,177 +345,179 @@ else:
     print('同時觀看人數 concurrentViewers:NaN')
 '''
 
-print('紀錄結束時最高同時觀看人數 Max Concurrent Viewers: '+str(MaxConcurrentViewers))
+print('Max Concurrent Viewers: '+str(MaxConcurrentViewers))
 
 if "viewCount" in sinfo['statistics']:
-    print('紀錄結束時播放數 View Count:', sinfo['statistics']['viewCount'])
+    print('View Count:', sinfo['statistics']['viewCount'])
 else:
-    print('紀錄結束時播放數 View Count:NaN')
+    print('View Count:NaN')
 
 if "likeCount" in sinfo['statistics']:
-    print('紀錄結束時喜歡數 Like Count:', sinfo['statistics']['likeCount'])
+    print('Like Count:', sinfo['statistics']['likeCount'])
 else:
-    print('紀錄結束時喜歡數 Like Count:NaN')
+    print('Like Count:NaN')
 
-if "dislikeCount" in sinfo['statistics']:
-    print('紀錄結束時不喜歡數 Dislike Count:', sinfo['statistics']['dislikeCount'])
+'''if "dislikeCount" in sinfo['statistics']:
+    print('Dislike Count:', sinfo['statistics']['dislikeCount'])
 else:
-    print('紀錄結束時不喜歡數 DislikeCount:NaN')
+    print('DislikeCount:NaN')'''
 
 print('~~~直播記錄結束,直播後記錄開始~~~')
 
+with open('CASI_'+TitleFileName+'.txt', 'a', newline='', encoding='UTF-8') as countInfo:
+    streamInfoCollectstart=['count for 1 day\n','Video_ID:',Video_ID,'\n','Stream Created time(UTC+8):',str(Stream_Created),'\n','Planed Start Time(UTC+8):',str(Planed_Start_Time),'\n']
+    countInfo.writelines(streamInfoCollectstart)
+
+    streamInfoCollectAST=['Actual Start Time(UTC+8):',str(Actual_Start_Time),'\n']
+    countInfo.writelines(streamInfoCollectAST)
+    Log_Start_Time = datetime.datetime.now().replace(microsecond=0).isoformat()
+    Log_Start_Time=localTimeClean(Log_Start_Time)
+    countInfo.write('Log Start Time(UTC+8):'+Log_Start_Time+'\n')
 #開啟csv檔寫入直播後數據
-countAfterStream=open('count after stream of '+TitleFileName+'.csv', 'a', newline='', encoding='UTF-8')
-#countAfterStream.write('time,viewCount,likeCount,dislikeCount\n')
+with open('CAS_'+TitleFileName+'.csv', 'a', newline='', encoding='UTF-8') as countAfterStream:
+    #countAfterStream.write('time,viewCount,likeCount,dislikeCount\n')
 
-#開啟txt檔寫入直播後資訊
-countInfo=open('count after stream info of '+TitleFileName+'.txt', 'a', newline='', encoding='UTF-8')
-streamInfoCollectstart=['count after stream: 1 day version\n','頻道 Channel:',Channel,'\n','標題 Title:',Title,'\n','影片ID Video_ID:',Video_ID,'\n','直播公開時間 Stream Created time(UTC+8):',str(Stream_Created),'\n','預定開始時間 Planed Start Time(UTC+8):',str(Planed_Start_Time),'\n']
-countInfo.writelines(streamInfoCollectstart)
+    #開啟txt檔寫入直播後資訊
 
-streamInfoCollectAST=['實際開始時間 Actual Start Time(UTC+8):',str(Actual_Start_Time),'\n']
-countInfo.writelines(streamInfoCollectAST)
-Log_Start_Time = datetime.datetime.now().replace(microsecond=0).isoformat()
-Log_Start_Time=localTimeClean(Log_Start_Time)
-countInfo.write('紀錄開始時間 Log Start Time(UTC+8):'+Log_Start_Time+'\n')
+    #寫入csv,預設一天,144*10min
 
-#寫入csv,預設一天,144*10min
+    viewCount150min=0
+    likeCount150min=0
+    #dislikeCount150min=0
+    commentCount150min=0
+    viewCount180min=0
+    likeCount180min=0
+    #dislikeCount180min=0
+    commentCount180min=0
 
-viewCount150min=0
-likeCount150min=0
-dislikeCount150min=0
-commentCount150min=0
-viewCount180min=0
-likeCount180min=0
-dislikeCount180min=0
-commentCount180min=0
+    for i in range(144):
 
-for i in range(144):
+        try:
+            localtime = datetime.datetime.now().replace(microsecond=0).isoformat()
+            localtime=localTimeClean(localtime)
 
-    try:
-        localtime = datetime.datetime.now().replace(microsecond=0).isoformat()
-        localtime=localTimeClean(localtime)
+            sinfo = get_livestream_info(API_KEY[apiKeySelect],vid)
 
-        sinfo = get_livestream_info(API_KEY[apiKeySelect],vid)
+            if "viewCount" in sinfo['statistics']:
+                viewCount=sinfo['statistics']['viewCount']
+            else:
+                viewCount=0
 
-        if "viewCount" in sinfo['statistics']:
-            viewCount=sinfo['statistics']['viewCount']
-        else:
-            viewCount=0
+            if "likeCount" in sinfo['statistics']:
+                likeCount=sinfo['statistics']['likeCount']
+            else:
+                likeCount=0
 
-        if "likeCount" in sinfo['statistics']:
-            likeCount=sinfo['statistics']['likeCount']
-        else:
-            likeCount=0
+            '''if "dislikeCount" in sinfo['statistics']:
+                dislikeCount=sinfo['statistics']['dislikeCount']
+            else:
+                dislikeCount=0'''
+            
+            if "commentCount" in sinfo['statistics']:
+                commentCount=sinfo['statistics']['commentCount']
+            else:
+                commentCount=0
+            
+            if i == 14:
+                viewCount150min=viewCount
+                likeCount150min=likeCount
+                #dislikeCount150min=dislikeCount
+                commentCount150min=commentCount
+            if i == 17:
+                viewCount180min=viewCount
+                likeCount180min=likeCount
+                #dislikeCount180min=dislikeCount
+                commentCount180min=commentCount
 
-        if "dislikeCount" in sinfo['statistics']:
-            dislikeCount=sinfo['statistics']['dislikeCount']
-        else:
-            dislikeCount=0
-        
-        if "commentCount" in sinfo['statistics']:
-            commentCount=sinfo['statistics']['commentCount']
-        else:
-            commentCount=0
-        
-        if i == 14:
-            viewCount150min=viewCount
-            likeCount150min=likeCount
-            dislikeCount150min=dislikeCount
-            commentCount150min=commentCount
-        if i == 17:
-            viewCount180min=viewCount
-            likeCount180min=likeCount
-            dislikeCount180min=dislikeCount
-            commentCount180min=commentCount
+            countAfterStream.write(str(localtime)+','+str(viewCount)+','+str(likeCount)+','+str(commentCount)+'\n')
+            print(str(localtime)+','+str(viewCount)+','+str(likeCount)+','+str(commentCount))
+            
+            second = sleep_time(0, 10, 0)
+            time.sleep(second)
 
-        countAfterStream.write(str(localtime)+','+str(viewCount)+','+str(likeCount)+','+str(dislikeCount)+','+str(commentCount)+'\n')
-        print(str(localtime)+','+str(viewCount)+','+str(likeCount)+','+str(dislikeCount)+','+str(commentCount))
-        
-        second = sleep_time(0, 10, 0)
-        time.sleep(second)
-
-    except KeyboardInterrupt:
-        logStopTime = datetime.datetime.now().replace(microsecond=0).isoformat()
-        logStopTime=localTimeClean(logStopTime)
-        print('---手動跳出紀錄---')
-        break
-    except:
-        second = sleep_time(0, 10, 0)
-        time.sleep(second)
-        continue
-
-countAfterStream.close()
+        except KeyboardInterrupt:
+            logStopTime = datetime.datetime.now().replace(microsecond=0).isoformat()
+            logStopTime=localTimeClean(logStopTime)
+            print('---手動跳出紀錄---')
+            break
+        except:
+            second = sleep_time(0, 10, 0)
+            time.sleep(second)
+            continue
 
 logStopTime = datetime.datetime.now().replace(microsecond=0).isoformat()
 logStopTime=localTimeClean(logStopTime)
 #info寫入
-try:
-    if "actualEndTime" in sinfo['liveStreamingDetails']:
-        Actual_End_Time=sinfo['liveStreamingDetails']['actualEndTime']
-        Actual_End_Time=APItimeSetToUTC8(Actual_End_Time)
-        countInfo.write('直播結束時間 Actual End Time(UTC+8):'+str(Actual_End_Time)+'\n')
-    else:
+with open('CASI_'+TitleFileName+'.txt', 'a', newline='', encoding='UTF-8') as countInfo:
+    try:
+        if "actualEndTime" in sinfo['liveStreamingDetails']:
+            Actual_End_Time=sinfo['liveStreamingDetails']['actualEndTime']
+            Actual_End_Time=APItimeSetToUTC8(Actual_End_Time)
+            countInfo.write('Actual End Time(UTC+8):'+str(Actual_End_Time)+'\n')
+        else:
+            Actual_End_Time='NaN'
+            countInfo.write('Actual End Time(UTC+8):NaN\n')
+    except:
         Actual_End_Time='NaN'
-        countInfo.write('直播結束時間 Actual End Time(UTC+8):NaN\n')
-except:
-    Actual_End_Time='NaN'
-    countInfo.write('直播結束時間 Actual End Time(UTC+8):NaN\n')
+        countInfo.write('Actual End Time(UTC+8):NaN\n')
 
-countInfo.write('紀錄結束時間 Log stop Time(UTC+8):'+str(logStopTime)+'\n')
+    countInfo.write('Log stop Time(UTC+8):'+str(logStopTime)+'\n')
 
-countInfo.write('紀錄於2.5hr時播放數 View Count:'+str(viewCount150min)+'\n')
-countInfo.write('紀錄於2.5hr時喜歡數 Like Count:'+str(likeCount150min)+'\n')
-countInfo.write('紀錄於2.5hr時不喜歡數 Dislike Count:'+str(dislikeCount150min)+'\n')
-countInfo.write('紀錄於2.5hr時留言數 Comment Count:'+str(commentCount150min)+'\n')
+    sinfo = get_livestream_info(API_KEY[apiKeySelect],vid)
+    Title=sinfo['snippet']['title']
+    countInfo.write('Channel:'+str(Channel)+'\n')
+    countInfo.write('Title:'+str(Title)+'\n')
 
-countInfo.write('紀錄於3hr時播放數 View Count:'+str(viewCount180min)+'\n')
-countInfo.write('紀錄於3hr時喜歡數 Like Count:'+str(likeCount180min)+'\n')
-countInfo.write('紀錄於3hr時不喜歡數 Dislike Count:'+str(dislikeCount180min)+'\n')
-countInfo.write('紀錄於3hr時留言數 Comment Count:'+str(commentCount180min)+'\n')
+    countInfo.write('View Count at 2.5hr:'+str(viewCount150min)+'\n')
+    countInfo.write('Like Count at 2.5hr:'+str(likeCount150min)+'\n')
+    #countInfo.write('Dislike Count at 2.5hr:'+str(dislikeCount150min)+'\n')
+    countInfo.write('Comment Count at 2.5hr:'+str(commentCount150min)+'\n')
 
-if "viewCount" in sinfo['statistics']:
-    countInfo.write('紀錄結束時播放數 View Count:'+str(viewCount)+'\n')
-else:
-    countInfo.write('紀錄結束時播放數 View Count:NaN'+'\n')
+    countInfo.write('View Count at 3hr:'+str(viewCount180min)+'\n')
+    countInfo.write('Like Count at 3hr:'+str(likeCount180min)+'\n')
+    #countInfo.write('Dislike Count at 3hr:'+str(dislikeCount180min)+'\n')
+    countInfo.write('Comment Count at 3hr:'+str(commentCount180min)+'\n')
 
-if "likeCount" in sinfo['statistics']:
-    countInfo.write('紀錄結束時喜歡數 Like Count:'+str(likeCount)+'\n')
-else:
-    countInfo.write('紀錄結束時喜歡數 Like Count:NaN'+'\n')
+    if "viewCount" in sinfo['statistics']:
+        countInfo.write('View Count:'+str(viewCount)+'\n')
+    else:
+        countInfo.write('View Count:NaN'+'\n')
 
-if "dislikeCount" in sinfo['statistics']:
-    countInfo.write('紀錄結束時不喜歡數 Dislike Count:'+str(dislikeCount)+'\n')
-else:
-    countInfo.write('紀錄結束時不喜歡數 Dislike Count:NaN'+'\n')
+    if "likeCount" in sinfo['statistics']:
+        countInfo.write('Like Count:'+str(likeCount)+'\n')
+    else:
+        countInfo.write('Like Count:NaN'+'\n')
 
-if "commentCount" in sinfo['statistics']:
-    countInfo.write('紀錄結束時留言數 Comment Count:'+str(commentCount)+'\n')
-else:
-    countInfo.write('紀錄結束時留言數 Comment Count:NaN'+'\n')
+    '''if "dislikeCount" in sinfo['statistics']:
+        countInfo.write('Dislike Count:'+str(dislikeCount)+'\n')
+    else:
+        countInfo.write('Dislike Count:NaN'+'\n')'''
 
-countInfo.close()
+    if "commentCount" in sinfo['statistics']:
+        countInfo.write('Comment Count:'+str(commentCount)+'\n')
+    else:
+        countInfo.write('Comment Count:NaN'+'\n')
 
 
 #繪圖
 chartTitle='Channel: '+Channel+'\n'+'Title: '+Title+'\n'+'Count for 1 day'
 
 #這裡應該能簡化
-headers=['time','viewCount','likeCount','dislikeCount','commentCount']
-dfafter = pd.read_csv('count after stream of '+TitleFileName+'.csv', names=headers,header=None,usecols=[0,1,2,3,4])
+headers=['time','viewCount','likeCount','commentCount']
+dfafter = pd.read_csv('CAS_'+TitleFileName+'.csv', names=headers,header=None,usecols=[0,1,2,3])
 
 t = dfafter['time']
 
 v = dfafter['viewCount']
 l = dfafter['likeCount']
-d = dfafter['dislikeCount']
+#d = dfafter['dislikeCount']
 c = dfafter['commentCount']
 
 MaxViewCount=dfafter['viewCount'].max()
 MaxLikeCount=dfafter['likeCount'].max()
-MaxDislikeCount=dfafter['dislikeCount'].max()
+#MaxDislikeCount=dfafter['dislikeCount'].max()
 MaxCommentCount=dfafter['commentCount'].max()
-countResult='MaxLikeCount:{0}\nMaxDislikeCount:{1}\nViewCountAt2.5hr:{2}\nViewCountAt3hr:{3}\nMaxViewCount:{4}\nMaxCommentCount:{5}'.format(MaxLikeCount,MaxDislikeCount,viewCount150min,viewCount180min,MaxViewCount,MaxCommentCount)
+countResult='MaxLikeCount:{0}\nViewCountAt2.5hr:{1}\nViewCountAt3hr:{2}\nMaxViewCount:{3}\nMaxCommentCount:{4}'.format(MaxLikeCount,viewCount150min,viewCount180min,MaxViewCount,MaxCommentCount)
 timeResult='Actual Start Time(UTC+8):{0}\nActual End Time(UTC+8):{1}\nLog Start Time(UTC+8):{2}\nLog Stop Time(UTC+8):{3}'.format(Actual_Start_Time,Actual_End_Time,Log_Start_Time,logStopTime)
 
 #標題副標題,圖表結構,部分頻道和標題因字型問題無法完整顯示
@@ -528,7 +532,7 @@ ax3.set_title(timeResult,loc='right', fontsize=12)
 ax3.set_ylabel('count')
 
 ax3.plot(t,l,'g',label='likeCount')
-ax3.plot(t,d,'r',label='dislikeCount')
+#ax3.plot(t,d,'r',label='dislikeCount')
 ax3.legend(loc='upper left')
 ax3.ticklabel_format(axis='y', style='plain')
 ax3.grid(True)
@@ -564,50 +568,50 @@ fig2.savefig('count chart after stream of ' + TitleFileName + '.png')
 print('---儲存完成---')
 
 #結束後輸出
-print('頻道 Channel:', sinfo['snippet']['channelTitle'])
-print('標題 Title:', sinfo['snippet']['title'])
-print('影片ID Video ID:', sinfo['id'])
+print('Channel:', sinfo['snippet']['channelTitle'])
+print('Title:', sinfo['snippet']['title'])
+print('Video ID:', sinfo['id'])
 if "publishedAt" in sinfo['snippet']:
-    print('直播公開時間 Stream Created Time(UTC+8):', Stream_Created)
+    print('Stream Created Time(UTC+8):', Stream_Created)
 else:
-    print('直播公開時間 Stream Created Time(UTC+8):NaN')
+    print('Stream Created Time(UTC+8):NaN')
 try:
     if "scheduledStartTime" in sinfo['liveStreamingDetails']:
-        print('預定開始時間 Planed Start Time(UTC+8):', Planed_Start_Time)
+        print('Planed Start Time(UTC+8):', Planed_Start_Time)
     else:
-        print('預定開始時間 Planed Start Time(UTC+8):NaN')
+        print('Planed Start Time(UTC+8):NaN')
 
     if "actualStartTime" in sinfo['liveStreamingDetails']:
-        print('實際開始時間 Actual Start Time(UTC+8):', Actual_Start_Time)
+        print('Actual Start Time(UTC+8):', Actual_Start_Time)
     else:
-        print('實際開始時間 Actual Start Time(UTC+8):NaN')
+        print('Actual Start Time(UTC+8):NaN')
 
     if "actualEndTime" in sinfo['liveStreamingDetails']:
-        print('直播結束時間 Actual End Time(UTC+8):', Actual_End_Time)
+        print('Actual End Time(UTC+8):', Actual_End_Time)
     else:
-        print('直播結束時間 Actual End Time(UTC+8):NaN\n')
+        print('Actual End Time(UTC+8):NaN')
 except:
-    print('預定開始時間 Planed Start Time(UTC+8):NaN')
-    print('實際開始時間 Actual Start Time(UTC+8):NaN')
-    print('直播結束時間 Actual End Time(UTC+8):NaN')
-print('紀錄結束時間 Log Stop Time(UTC+8): '+str(logStopTime)+'\n')
+    print('Planed Start Time(UTC+8):NaN')
+    print('Actual Start Time(UTC+8):NaN')
+    print('Actual End Time(UTC+8):NaN')
+print('Log Stop Time(UTC+8): '+str(logStopTime))
 
 if "viewCount" in sinfo['statistics']:
-    print('紀錄結束時播放數 View Count:', sinfo['statistics']['viewCount'])
+    print('View Count:', sinfo['statistics']['viewCount'])
 else:
-    print('紀錄結束時播放數 View Count:NaN')
+    print('View Count:NaN')
 
 if "likeCount" in sinfo['statistics']:
-    print('紀錄結束時喜歡數 Like Count:', sinfo['statistics']['likeCount'])
+    print('Like Count:', sinfo['statistics']['likeCount'])
 else:
-    print('紀錄結束時喜歡數 Like Count:NaN')
+    print('Like Count:NaN')
 
-if "dislikeCount" in sinfo['statistics']:
-    print('紀錄結束時不喜歡數 Dislike Count:', sinfo['statistics']['dislikeCount'])
+'''if "dislikeCount" in sinfo['statistics']:
+    print('Dislike Count:', sinfo['statistics']['dislikeCount'])
 else:
-    print('紀錄結束時不喜歡數 Dislike Count:NaN')
+    print('Dislike Count:NaN')'''
 
 if "commentCount" in sinfo['statistics']:
-    print('紀錄結束時留言數 Comment Count:', sinfo['statistics']['commentCount'])
+    print('Comment Count:', sinfo['statistics']['commentCount'])
 else:
-    print('紀錄結束時留言數 Comment Count:NaN')
+    print('Comment Count:NaN')

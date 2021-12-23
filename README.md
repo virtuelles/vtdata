@@ -1,5 +1,9 @@
 # vtdata
 完成度還差很遠,堪用而已  
+20211223更新  
+  dislike註解掉和調整  
+  fileopen調整  
+  info順序調整
 20210910更新  
   輸出圖片修改  
   livestream,countafterstream,collectall整理統一  
@@ -58,10 +62,10 @@ python streamdata.py
 - [X] 時間格式整理
 - [ ] 捕捉自動化
 - [X] 自動輸出圖表
-- [ ] 例外處理(不夠完整)
+- [X] 例外處理
 - [ ] 留言、會員、SC統計
 - [ ] 聊天室國籍組成
-- [ ] 影片播放數紀錄
+- [X] 影片播放數紀錄
 - [ ] 網頁化
-- [ ] twitter bot
-- [ ] discord bot
+- [X] twitter bot
+- [X] discord bot
